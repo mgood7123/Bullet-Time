@@ -45,7 +45,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             Matrix_State = 2;
             Matrix_Time = slowdownFactor;
-            Time.timeScale = Matrix_Time;
+            Time.fixedDeltaTime = Matrix_Time;
         }
 
         public void DoSpeedUp()
@@ -53,7 +53,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             Matrix_State = 3;
             Matrix_Time += (1f / 1f) * Time.unscaledDeltaTime;
             Matrix_Time = Mathf.Clamp(Matrix_Time, 0f, 1f);
-            Time.timeScale = Matrix_Time;
+            Time.fixedDeltaTime = Matrix_Time;
             if (Matrix_Time >= Time_Original) Matrix_State = 0;
         }
 
@@ -61,14 +61,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             Matrix_Time -= (1f / 1f) * Time.unscaledDeltaTime;
             Matrix_Time = Mathf.Clamp(Matrix_Time, 0f, 1f);
-            Time.timeScale = Matrix_Time;
+            Time.fixedDeltaTime = Matrix_Time;
             if (Matrix_Time < slowdownFactor) Matrix_State = 1;
         }
 
         public void Start()
         {
-            if (Matrix_Time == 0) Matrix_Time = Time.timeScale;
-            if (Time_Original == 0) Time_Original = Time.timeScale;
+            if (Matrix_Time == 0) Matrix_Time = Time.fixedDeltaTime;
+            if (Time_Original == 0) Time_Original = Time.fixedDeltaTime;
             MovementSpeed = MovementSpeedDefault;
             m_RigidBody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
@@ -91,18 +91,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 moveDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
                 moveDirection = transform.TransformDirection(moveDirection);
                 moveDirection *= MovementSpeed;
-                if (Input.GetButton("Jump")) moveDirection.y = jumpForce / Matrix_Time;
-                MovementSpeed = MovementSpeedDefault / Matrix_Time;
+                if (Input.GetButton("Jump")) moveDirection.y = jumpForce;
+                MovementSpeed = MovementSpeedDefault;
             }
             else
             {
-                moveDirection.y -= (gravity * Time.fixedUnscaledDeltaTime) / Matrix_Time;
+                moveDirection.y -= (gravity * 0.02f);
             }
             verticalVelocity = moveDirection.y;
-            controller.Move(moveDirection * Time.fixedDeltaTime);
+            controller.Move(moveDirection * 0.02f);
             if (Input.GetButtonDown("Matrix")) Matrix = !Matrix;
 
-            if (Matrix)
+            if (Matrix == true)
             {
                 if (Matrix_Instant_Time)
                 {
@@ -119,12 +119,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 if (Matrix_Instant_Time)
                 {
                     Matrix_Time = Time_Original;
-                    Time.timeScale = Matrix_Time;
+                    Time.fixedDeltaTime = Matrix_Time;
                     Matrix_State = 0;
                 }
                 else DoSpeedUp();
             }
-            Time.fixedDeltaTime = Time.timeScale * .02f;
+            Time.fixedDeltaTime = Time.fixedDeltaTime * .02f;
         }
 
         private Vector2 GetInput()
