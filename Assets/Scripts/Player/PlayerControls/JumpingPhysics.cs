@@ -125,7 +125,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 }
                 else DoSpeedUp();
             }
-            Time.deltaTime = Time.timeScale * .02f;
+            Time.fixedDeltaTime = Time.timeScale * .02f;
         }
 
         private Vector2 GetInput()
