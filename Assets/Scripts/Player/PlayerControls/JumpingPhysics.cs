@@ -40,12 +40,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public bool Matrix = false;
         public bool Matrix_Instant_Time = true;
         public int Matrix_State = 0;
+		public float DELTATIME = 0f;
 
         public void DoSlowmotion()
         {
             Matrix_State = 2;
             Matrix_Time = slowdownFactor;
-            Time.fixedDeltaTime = Matrix_Time;
+            Time.timeScale = Matrix_Time;
         }
 
         public void DoSpeedUp()
@@ -53,7 +54,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             Matrix_State = 3;
             Matrix_Time += (1f / 1f) * Time.unscaledDeltaTime;
             Matrix_Time = Mathf.Clamp(Matrix_Time, 0f, 1f);
-            Time.fixedDeltaTime = Matrix_Time;
+            Time.timeScale = Matrix_Time;
             if (Matrix_Time >= Time_Original) Matrix_State = 0;
         }
 
@@ -61,14 +62,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             Matrix_Time -= (1f / 1f) * Time.unscaledDeltaTime;
             Matrix_Time = Mathf.Clamp(Matrix_Time, 0f, 1f);
-            Time.fixedDeltaTime = Matrix_Time;
+            Time.timeScale = Matrix_Time;
             if (Matrix_Time < slowdownFactor) Matrix_State = 1;
         }
 
         public void Start()
         {
-            if (Matrix_Time == 0) Matrix_Time = Time.fixedDeltaTime;
-            if (Time_Original == 0) Time_Original = Time.fixedDeltaTime;
+            if (Matrix_Time == 0) Matrix_Time = Time.timeScale;
+            if (Time_Original == 0) Time_Original = Time.timeScale;
             MovementSpeed = MovementSpeedDefault;
             m_RigidBody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
@@ -96,13 +97,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             else
             {
-                moveDirection.y -= (gravity * 0.02f);
+                moveDirection.y -= (gravity * Time.fixedUnscaledDeltaTime);
             }
             verticalVelocity = moveDirection.y;
-            controller.Move(moveDirection * 0.02f);
+            controller.Move(moveDirection * Time.fixedDeltaTime);
             if (Input.GetButtonDown("Matrix")) Matrix = !Matrix;
 
-            if (Matrix == true)
+            if (Matrix)
             {
                 if (Matrix_Instant_Time)
                 {
@@ -119,12 +120,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 if (Matrix_Instant_Time)
                 {
                     Matrix_Time = Time_Original;
-                    Time.fixedDeltaTime = Matrix_Time;
+                    Time.timeScale = Matrix_Time;
                     Matrix_State = 0;
                 }
                 else DoSpeedUp();
             }
-            Time.fixedDeltaTime = Time.fixedDeltaTime * .02f;
+            Time.deltaTime = Time.timeScale * .02f;
         }
 
         private Vector2 GetInput()
